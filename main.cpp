@@ -1,5 +1,6 @@
 #include <benchmark/benchmark.h>
 #include <chrono>
+#include <thread>
 #include <iostream>
 #include <random>
 
@@ -7,9 +8,9 @@ constexpr unsigned int N = 128;
 constexpr unsigned int NUM_ITERATIONS = 2500;
 
 static void matmul() {
-    volatile double a[N][N];
-    volatile double b[N][N];
-    volatile double c[N][N];
+    double a[N][N];
+    double b[N][N];
+    double c[N][N];
 
     std::random_device rd;
     std::mt19937 gen(rd());
@@ -39,13 +40,14 @@ static void BM_matmul(benchmark::State& state) {
     }
 
     auto end = std::chrono::high_resolution_clock::now();
-    auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start);
+    auto elapsed_seconds = std::chrono::duration_cast<std::chrono::duration<double>>(end - start) / state.threads();
     state.counters["TotalTimeSec"] = benchmark::Counter(elapsed_seconds.count(), benchmark::Counter::kDefaults);
     state.counters["IterationsPerSec"] = benchmark::Counter(state.iterations(), benchmark::Counter::kIsRate);
 }
 
 BENCHMARK(BM_matmul)
+    ->Unit(benchmark::kMillisecond)
     ->Iterations(NUM_ITERATIONS)
-    ->Unit(benchmark::kMillisecond);
+    ->ThreadRange(1, std::thread::hardware_concurrency());
 
 BENCHMARK_MAIN();
