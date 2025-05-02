@@ -47,7 +47,7 @@ static void BM_matmul(benchmark::State& state) {
 
 int main(int argc, char **argv) {
     const unsigned int maxThreads = std::thread::hardware_concurrency();
-    for (unsigned int i = 1; i < maxThreads; i *= 2) {
+    for (unsigned int i = 1; i <= maxThreads; i *= 2) {
         benchmark::RegisterBenchmark("BM_matmul", BM_matmul)
             ->Iterations(NUM_ITERATIONS / i)
             ->Unit(benchmark::kMillisecond)
